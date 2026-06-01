@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Inventory{% endblock %}
+{% block page_title %}Inventory{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between"><span>Products & Inventory</span><a href="{{ url_for('inventory_add') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus"></i> Add</a></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Cost</th><th>Stock</th><th>Type</th><th></th></tr></thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td>{{ p.name }}</td><td><span class="badge bg-info">{{ p.category }}</span></td>
+                    <td>${{ "%.2f"|format(p.unit_price|float) }}</td><td>${{ "%.2f"|format(p.cost_price|float) }}</td>
+                    <td>{% if p.is_service == 'TRUE' %}-{% else %}{{ p.stock_qty }} {{ p.unit }}{% endif %}</td>
+                    <td>{% if p.is_service == 'TRUE' %}Service{% else %}Product{% endif %}</td>
+                    <td>
+                        <a href="{{ url_for('inventory_edit', id=p.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <form method="POST" action="{{ url_for('inventory_delete', id=p.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+                            <button class="btn btn-sm btn-outline-danger">Del</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center py-4 text-secondary">No products</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

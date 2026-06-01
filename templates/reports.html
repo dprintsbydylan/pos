@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports - Profit & Loss{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between"><span>Monthly P&L - {{ year }}</span>
+        <form class="d-flex gap-2">
+            <select name="year" class="form-select form-select-sm" onchange="this.form.submit()" style="width:auto">
+                {% for y in range(2024, 2030) %}
+                <option value="{{ y }}" {{ 'selected' if year==y|string }}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead><tr><th>Month</th><th>Sales</th><th>Expenses</th><th>Profit/Loss</th></tr></thead>
+                <tbody>
+                    {% for i in range(12) %}
+                    <tr class="{{ 'table-danger' if profit_loss[i] < 0 }}">
+                        <td>{{ months[i] }}</td>
+                        <td>${{ "%.2f"|format(monthly_sales[i]) }}</td>
+                        <td>${{ "%.2f"|format(monthly_expenses[i]) }}</td>
+                        <td class="{{ 'text-danger' if profit_loss[i] < 0 else 'text-success' }}">${{ "%.2f"|format(profit_loss[i]) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="row g-2 mt-2">
+            <div class="col-md-4"><strong>Total Sales:</strong> ${{ "%.2f"|format(total_sales) }}</div>
+            <div class="col-md-4"><strong>Total Expenses:</strong> ${{ "%.2f"|format(total_expenses) }}</div>
+            <div class="col-md-4"><strong>Net Profit:</strong> <span class="{{ 'text-danger' if net_profit < 0 else 'text-success' }}">${{ "%.2f"|format(net_profit) }}</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">Orders by Status</div>
+    <div class="card-body">
+        {% for status, count in orders_by_status %}
+        <div class="d-flex justify-content-between mb-1"><span>{{ status }}</span><span class="badge bg-secondary">{{ count }}</span></div>
+        {% else %}
+        <p class="text-secondary mb-0">No orders</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_no }}{% endblock %}
+{% block page_title %}Order {{ order.order_no }}{% endblock %}
+{% block content %}
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Order Items</span>
+                <div class="d-flex gap-2 align-items-center">
+                    <form method="POST" action="{{ url_for('pos_update_status', order_id=order.id) }}" class="d-flex gap-2 align-items-center">
+                        <select name="status" class="form-select form-select-sm" style="width:auto">
+                            <option value="Pending" {{ 'selected' if order.status=='Pending' }}>Pending</option>
+                            <option value="In Progress" {{ 'selected' if order.status=='In Progress' }}>In Progress</option>
+                            <option value="Completed" {{ 'selected' if order.status=='Completed' }}>Completed</option>
+                            <option value="Cancelled" {{ 'selected' if order.status=='Cancelled' }}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr></thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{ item.description }}</td>
+                            <td>${{ "%.2f"|format(item.unit_price|float) }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ "%.2f"|format(item.subtotal|float) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">Payments</div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Reference</th></tr></thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td>{{ (p.payment_date or '')[:10] }}</td>
+                            <td>{{ p.method }}</td>
+                            <td>${{ "%.2f"|format(p.amount|float) }}</td>
+                            <td>{{ p.reference or '' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-secondary py-3">No payments recorded</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if order.payment_status != 'Paid' and order.status != 'Cancelled' %}
+        <div class="card mt-3">
+            <div class="card-header">Record Payment</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('pos_pay', order_id=order.id) }}" class="row g-2">
+                    <div class="col-md-4">
+                        <input type="number" name="amount" class="form-control" placeholder="Amount" step="0.01" min="0.01" max="{{ order.total - order.amount_paid }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="method" class="form-select">
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-success w-100"><i class="bi bi-cash"></i> Pay</button>
+                    </div>
+                </form>
+                <small class="text-secondary">Balance Due: ${{ "%.2f"|format((order.total|float) - (order.amount_paid|float)) }}</small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Summary</div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr><td>Customer:</td><td>{{ customer.name if customer else 'Walk-in' }}</td></tr>
+                    {% if customer and customer.phone %}<tr><td>Phone:</td><td>{{ customer.phone }}</td></tr>{% endif %}
+                    <tr><td>Status:</td><td><span class="badge bg-{{ 'success' if order.status=='Completed' else 'warning' if order.status=='In Progress' else 'secondary' }}">{{ order.status }}</span></td></tr>
+                    <tr><td>Date:</td><td>{{ (order.order_date or '')[:10] }}</td></tr>
+                    <tr><td>Subtotal:</td><td>${{ "%.2f"|format(order.subtotal|float) }}</td></tr>
+                    <tr><td>Tax (8%):</td><td>${{ "%.2f"|format(order.tax|float) }}</td></tr>
+                    <tr><td>Discount:</td><td>${{ "%.2f"|format(order.discount|float) }}</td></tr>
+                    <tr class="fw-bold"><td>Total:</td><td>${{ "%.2f"|format(order.total|float) }}</td></tr>
+                    <tr><td>Paid:</td><td>${{ "%.2f"|format(order.amount_paid|float) }}</td></tr>
+                    <tr><td>Balance:</td><td>${{ "%.2f"|format((order.total|float) - (order.amount_paid|float)) }}</td></tr>
+                    <tr><td>Payment:</td><td><span class="badge bg-{{ 'success' if order.payment_status=='Paid' else 'warning' if order.payment_status=='Partially Paid' else 'danger' }}">{{ order.payment_status }}</span></td></tr>
+                </table>
+                {% if order.notes %}<p class="mb-0"><small>Notes: {{ order.notes }}</small></p>{% endif %}
+            </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2 no-print">
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+            <a href="{{ url_for('pos') }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> New Order</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

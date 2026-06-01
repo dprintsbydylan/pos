@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Accounting{% endblock %}
+{% block page_title %}Accounting{% endblock %}
+{% block content %}
+<div class="row g-2 mb-3">
+    <div class="col-md-4"><div class="stat-card"><small class="text-secondary">Total Sales</small><h4>${{ "%.2f"|format(sales) }}</h4></div></div>
+    <div class="col-md-4"><div class="stat-card"><small class="text-secondary">Total Expenses</small><h4>${{ "%.2f"|format(expenses) }}</h4></div></div>
+    <div class="col-md-4"><div class="stat-card"><small class="text-secondary">Accounts Receivable</small><h4>${{ "%.2f"|format(receivables) }}</h4></div></div>
+</div>
+<div class="row g-2">
+    <div class="col-md-8">
+        <div class="card"><div class="card-header">General Ledger</div>
+            <div class="card-body p-0" style="max-height:400px;overflow-y:auto">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Date</th><th>Description</th><th>Account</th><th>Type</th><th>Debit</th><th>Credit</th></tr></thead>
+                    <tbody>
+                        {% for j in ledger %}
+                        <tr><td>{{ j.date[:10] if j.date else '' }}</td><td>{{ j.description[:50] }}</td><td>{{ j.account_name }}</td>
+                            <td><span class="badge bg-{{ 'success' if j.entry_type=='sale' else 'danger' if j.entry_type=='expense' else 'secondary' }}">{{ j.entry_type }}</span></td>
+                            <td>${{ "%.2f"|format(j.debit|float) }}</td><td>${{ "%.2f"|format(j.credit|float) }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="6" class="text-center py-3 text-secondary">No entries</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card"><div class="card-header">Expenses by Category</div>
+            <div class="card-body">
+                {% for cat, amt in expense_categories.items() %}
+                <div class="d-flex justify-content-between mb-1"><span>{{ cat }}</span><span>${{ "%.2f"|format(amt) }}</span></div>
+                {% else %}
+                <p class="text-secondary mb-0">No expenses this month</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card mt-2">
+            <div class="card-header">Quick Links</div>
+            <div class="card-body">
+                <a href="{{ url_for('report_ledger') }}" class="btn btn-outline-primary btn-sm w-100">Full Ledger</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

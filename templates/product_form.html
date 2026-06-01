@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if product else 'Add' }} Product{% endblock %}
+{% block page_title %}{{ 'Edit' if product else 'Add' }} Product{% endblock %}
+{% block content %}
+<div class="card"><div class="card-body">
+<form method="POST">
+    <div class="mb-2"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required></div>
+    <div class="mb-2"><label class="form-label">Category</label>
+        <select name="category" class="form-select">
+            <option value="Printing Service" {{ 'selected' if product and product.category=='Printing Service' }}>Printing Service</option>
+            <option value="Paper" {{ 'selected' if product and product.category=='Paper' }}>Paper</option>
+            <option value="Ink/Toner" {{ 'selected' if product and product.category=='Ink/Toner' }}>Ink/Toner</option>
+            <option value="Supply" {{ 'selected' if product and product.category=='Supply' }}>Supply</option>
+            <option value="Other" {{ 'selected' if product and product.category=='Other' }}>Other</option>
+        </select></div>
+    <div class="row g-2 mb-2">
+        <div class="col-4"><label class="form-label">Unit Price</label><input type="number" name="unit_price" class="form-control" step="0.01" value="{{ product.unit_price if product else 0 }}"></div>
+        <div class="col-4"><label class="form-label">Cost Price</label><input type="number" name="cost_price" class="form-control" step="0.01" value="{{ product.cost_price if product else 0 }}"></div>
+        <div class="col-4"><label class="form-label">Stock Qty</label><input type="number" name="stock_qty" class="form-control" step="0.5" value="{{ product.stock_qty if product else 0 }}"></div>
+    </div>
+    <div class="mb-2"><label class="form-label">Unit</label><input type="text" name="unit" class="form-control" value="{{ product.unit if product else 'pc' }}"></div>
+    <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="is_service" id="is_service" {{ 'checked' if product and product.is_service=='TRUE' }}><label class="form-check-label">This is a service (no stock tracking)</label></div>
+    <div class="mb-2"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="2">{{ product.description if product else '' }}</textarea></div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{{ url_for('inventory') }}" class="btn btn-secondary">Cancel</a>
+</form>
+</div></div>
+{% endblock %}

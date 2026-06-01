@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Orders{% endblock %}
+{% block page_title %}Orders{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>All Orders</span>
+        <a href="{{ url_for('pos') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus"></i> New Order</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Order#</th><th>Date</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th>Payment</th><th></th></tr></thead>
+                <tbody>
+                    {% for o in orders %}
+                    <tr>
+                        <td><a href="{{ url_for('pos_order_detail', order_id=o.id) }}">{{ o.order_no }}</a></td>
+                        <td>{{ (o.order_date or '')[:10] }}</td>
+                        <td>{{ o.customer_name }}</td>
+                        <td>${{ "%.2f"|format(o.total|float) }}</td>
+                        <td>${{ "%.2f"|format(o.amount_paid|float) }}</td>
+                        <td>${{ "%.2f"|format((o.total|float) - (o.amount_paid|float)) }}</td>
+                        <td><span class="badge bg-{{ 'success' if o.status=='Completed' else 'warning' if o.status=='In Progress' else 'secondary' }}">{{ o.status }}</span></td>
+                        <td><span class="badge bg-{{ 'success' if o.payment_status=='Paid' else 'warning' if o.payment_status=='Partially Paid' else 'danger' }}">{{ o.payment_status }}</span></td>
+                        <td><a href="{{ url_for('pos_order_detail', order_id=o.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="9" class="text-center py-4 text-secondary">No orders found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

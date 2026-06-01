@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}General Ledger{% endblock %}
+{% block page_title %}General Ledger{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between">
+        <span>All Entries</span>
+        <span>Debits: ${{ "%.2f"|format(total_debits) }} | Credits: ${{ "%.2f"|format(total_credits) }}</span>
+    </div>
+    <div class="card-body p-0">
+        <div style="max-height:500px;overflow-y:auto">
+            <table class="table table-sm mb-0">
+                <thead><tr><th>Date</th><th>Description</th><th>Account</th><th>Type</th><th>Debit</th><th>Credit</th></tr></thead>
+                <tbody>
+                    {% for j in entries.items %}
+                    <tr><td>{{ j.date[:10] if j.date else '' }}</td><td>{{ j.description[:60] }}</td><td>{{ j.account_name }}</td>
+                        <td><span class="badge bg-{{ 'success' if j.entry_type=='sale' else 'danger' if j.entry_type=='expense' else 'secondary' }}">{{ j.entry_type }}</span></td>
+                        <td>${{ "%.2f"|format(j.debit|float) }}</td><td>${{ "%.2f"|format(j.credit|float) }}</td></tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center py-4 text-secondary">No entries</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% if entries.pages > 1 %}
+<nav class="mt-2"><ul class="pagination pagination-sm">
+    {% for p in range(1, entries.pages + 1) %}
+    <li class="page-item {{ 'active' if p==entries.page }}"><a class="page-link" href="{{ url_for('report_ledger', page=p) }}">{{ p }}</a></li>
+    {% endfor %}
+</ul></nav>
+{% endif %}
+{% endblock %}
